@@ -24,23 +24,25 @@
 
 
     if(isset($_POST['upd'])){
-        $item = $_POST['upd'];
-        $filter = [ 'item' =>  $item ]; 
+        $_id = $_POST['upd'];
+        $filter = [ '_id' =>   new MongoDB\BSON\ObjectID($_id) ]; 
         $qry2 = new MongoDB\Driver\Query($filter);
         $rows2 = $mng->executeQuery("productdb.product", $qry2); 
         $car = current($rows2->toArray());
     
-        if (!empty($car)) {
-        
+        if (!empty($car)) {        
+            $_id =  $car->_id;
             $item =  $car->item;
             $qty = $car->qty;
         } 
     } else {
+        $_id = '';
         $item = '';
         $qty = '';
     }
 
     if(isset($_POST['update'])){
+        $_id = $_POST['update'];
         $item = $_POST['item'];
         $qty = $_POST['qty'];
 
@@ -48,7 +50,7 @@
             'item'=> $item, 
             'qty'=> $qty          
         );      
-        $bulk->update(['item' => $item], ['$set' => $rr]);
+        $bulk->update(['_id' => new MongoDB\BSON\ObjectID($_id)], ['$set' => $rr]);
         $mng->executeBulkWrite('productdb.product', $bulk);
 
         echo "<script>window.location.href='http://localhost/mongodb/';</script>";
@@ -57,7 +59,7 @@
 
     if(isset($_POST['del'])){
         $id = $_POST['del'];
-        $bulk->delete(['item' => $id]);
+        $bulk->delete(['_id' => new MongoDB\BSON\ObjectID($id)]);
         $mng->executeBulkWrite('productdb.product', $bulk);
 
         echo "<script>window.location.href='http://localhost/mongodb/';</script>";
@@ -74,22 +76,28 @@
             border:1px solid;
             padding:5px;
         }
+        .head{
+            text-align:center;
+            font-size:25px;
+            font-weight:bold;
+        }
     </style>
 </head>
 <body>
+        <div class="head">MongoDB</div>
     <form action="#" method="post">
         <div class="container">
             <input type="text" name="item" id="item" value="<?php echo $item ?>">
             <input type="text" name="qty" id="qty" value="<?php echo $qty ?>">
             <?php
-                if(empty($item)){
+                if(empty($_id)){
             ?>
-            <button type="submit" name="sub">Submit</button>
+                <button type="submit" name="sub">Submit</button>
             <?php
                 } else {
-            ?>
-            <button type="submit" value="<?php echo $item ?>" name="update">Update</button>
-            <?php
+                ?>
+                <button type="submit" value="<?php echo $_id ?>" name="update">Update</button>
+                <?php
                 }
             ?>
         </div>
@@ -116,12 +124,14 @@
                     <td><?php echo $row->qty; ?></td>
                     <td>
                         <form method="post">
-                            <button type="submit" value="<?php echo $row->item ?>" name="upd">Update</button>
+                            <button type="submit" value="<?php echo $row->_id ?>" name="upd">Update</button>
                         </form>
                     </td>
                     <td>
-                    <form method="post">
-                        <button type="submit" value="<?php echo $row->item ?>" name="del">Delete</button> </form></td> 
+                        <form method="post">
+                            <button type="submit" value="<?php echo $row->_id ?>" name="del">Delete</button> 
+                        </form>
+                    </td> 
                 </tr>
                 <?php
                 $i++;

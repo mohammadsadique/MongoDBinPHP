@@ -13,12 +13,12 @@
 
         //update
         //$bulk->update(where_clause, ['$set' => $rr]);
-        $bulk->update(['item' => $item], ['$set' => $rr]);
+        $bulk->update(['item' => new MongoDB\BSON\ObjectID($item)], ['$set' => $rr]);
         $mng->executeBulkWrite('productdb.product', $bulk);
 
         //delete
         //$bulk->delete(where_clause);
-        $bulk->delete(['item' => $id]);
+        $bulk->delete(['item' => new MongoDB\BSON\ObjectID($id)]);
         $mng->executeBulkWrite('productdb.product', $bulk);
 
         //fetchdata
@@ -28,7 +28,7 @@
             echo $row->item;
         }
             //show specific data\\
-            $filter = [ 'item' =>  $item ]; 
+            $filter = [ 'item' =>  new MongoDB\BSON\ObjectID($item) ]; 
             $qry2 = new MongoDB\Driver\Query($filter);
             $rows2 = $mng->executeQuery("productdb.product", $qry2); 
             $car = current($rows2->toArray());
